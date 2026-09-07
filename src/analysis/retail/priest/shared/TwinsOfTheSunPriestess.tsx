@@ -57,9 +57,6 @@ class TwinsOfTheSunPriestess extends Analyzer {
       this.goodCasts += 1;
     }
 
-    // Manually start the 120-second cooldown for the real cast
-    this.spellUsable.beginCooldown(event, TALENTS_PRIEST.POWER_INFUSION_TALENT.id);
-
     this.lastCast = event.timestamp;
   }
 

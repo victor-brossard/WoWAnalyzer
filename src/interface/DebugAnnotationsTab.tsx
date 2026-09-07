@@ -89,7 +89,7 @@ function EventDetails({
         <div>
           <dl>
             <dt>Timestamp</dt>
-            <dd>{formatDuration(event.timestamp - combatLogParser.fight.start_time)}</dd>
+            <dd>{formatDuration(event.timestamp - combatLogParser.fight.start_time, 2)}</dd>
             <dt>Type</dt>
             <dd>{event.type}</dd>
             {HasAbility(event) && (

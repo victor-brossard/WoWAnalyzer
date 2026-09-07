@@ -1,16 +1,12 @@
-import { CastEvent } from 'parser/core/Events';
-import CoreSpellUsable from 'parser/shared/modules/SpellUsable';
+import CoreAbilityTracker from 'parser/shared/modules/AbilityTracker';
 import { TALENTS_PRIEST } from 'common/TALENTS';
+import { CastEvent } from 'parser/core/Events';
 
-class SpellUsable extends CoreSpellUsable {
+class AbilityTracker extends CoreAbilityTracker {
   _previousPowerInfusionTimestamp = 0;
 
   onCast(event: CastEvent) {
     const spellId = event.ability.guid;
-
-    if (spellId == TALENTS_PRIEST.POWER_WORD_RADIANCE_TALENT.id) {
-      console.warn(event._linkedEvents);
-    }
 
     // Ignore 2nd consecutive cast of Power Infusion
     // that happens because of talent 'Twins of the Sun Priestess'
@@ -30,4 +26,4 @@ class SpellUsable extends CoreSpellUsable {
   }
 }
 
-export default SpellUsable;
+export default AbilityTracker;

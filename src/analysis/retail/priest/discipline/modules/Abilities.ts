@@ -4,6 +4,7 @@ import { SpellbookAbility } from 'parser/core/modules/Ability';
 import SPELL_CATEGORY from 'parser/core/SPELL_CATEGORY';
 import { DISCIPLINE_ABILITIES_AFFECTED_BY_HEALING_INCREASES } from '../constants';
 import { TALENTS_PRIEST } from 'common/TALENTS';
+import { hastedCooldown } from 'common/abilitiesConstants';
 
 class Abilities extends CoreAbilities {
   constructor(...args: ConstructorParameters<typeof CoreAbilities>) {
@@ -14,11 +15,17 @@ class Abilities extends CoreAbilities {
   spellbook(): SpellbookAbility[] {
     const combatant = this.selectedCombatant;
     return [
+      // SPELLS ADDED HERE ARE DISPLAYED ON THE STATISTICS TAB
+
+      // ------------------------------------------------------------------------------------------
+      // Rotational
+      // ------------------------------------------------------------------------------------------
+
       {
         spell: [SPELLS.PENANCE_CAST.id],
         category: SPELL_CATEGORY.ROTATIONAL,
-        cooldown: (haste) => 9 / (1 + haste),
-        charges: combatant.hasTalent(TALENTS_PRIEST.GUIDING_LIGHT_TALENT) ? 2 : 1,
+        cooldown: hastedCooldown(9),
+        charges: 1 + (combatant.hasTalent(TALENTS_PRIEST.GUIDING_LIGHT_TALENT) ? 1 : 0),
         gcd: {
           base: 1500,
         },
@@ -40,47 +47,26 @@ class Abilities extends CoreAbilities {
       {
         spell: TALENTS_PRIEST.POWER_WORD_RADIANCE_TALENT.id,
         category: SPELL_CATEGORY.ROTATIONAL,
-        cooldown: this.selectedCombatant.hasTalent(TALENTS_PRIEST.BRIGHT_PUPIL_TALENT) ? 15 : 20,
-        charges: 2,
+        cooldown: 18 - (combatant.hasTalent(TALENTS_PRIEST.BRIGHT_PUPIL_TALENT) ? 3 : 0),
+        charges: 1 + (combatant.hasTalent(TALENTS_PRIEST.LIGHTS_PROMISE_TALENT) ? 1 : 0),
         gcd: {
           base: 1500,
         },
         castEfficiency: {
           suggestion: true,
+          recommendedEfficiency: 0.9,
+          averageIssueEfficiency: 0.8,
+          majorIssueEfficiency: 0.7,
         },
         enabled: combatant.hasTalent(TALENTS_PRIEST.POWER_WORD_RADIANCE_TALENT),
-      },
-      {
-        spell: TALENTS_PRIEST.EVANGELISM_TALENT.id,
-        category: SPELL_CATEGORY.COOLDOWNS,
-        cooldown: 90,
-        gcd: {
-          base: 1500,
-        },
-        enabled: combatant.hasTalent(TALENTS_PRIEST.EVANGELISM_TALENT),
-        castEfficiency: {
-          suggestion: true,
-        },
-      },
-      {
-        spell: TALENTS_PRIEST.ULTIMATE_PENITENCE_TALENT.id,
-        category: SPELL_CATEGORY.COOLDOWNS,
-        gcd: {
-          base: 1500,
-        },
-        cooldown: 240,
-        castEfficiency: {
-          suggestion: true,
-        },
-        enabled: combatant.hasTalent(TALENTS_PRIEST.ULTIMATE_PENITENCE_TALENT),
       },
       {
         spell: SPELLS.POWER_WORD_SHIELD.id,
         category: SPELL_CATEGORY.ROTATIONAL,
         isDefensive: true,
-        cooldown: (haste) =>
-          (7.5 - (combatant.hasTalent(TALENTS_PRIEST.WASTE_NO_TIME_TALENT) ? 1.5 : 0.0)) /
-          (1 + haste),
+        cooldown: hastedCooldown(
+          7.5 - (combatant.hasTalent(TALENTS_PRIEST.WASTE_NO_TIME_TALENT) ? 1.5 : 0.0),
+        ),
         gcd: {
           base: 1500,
         },
@@ -89,35 +75,12 @@ class Abilities extends CoreAbilities {
         spell: SPELLS.VOID_SHIELD.id,
         category: SPELL_CATEGORY.ROTATIONAL,
         isDefensive: true,
-        cooldown: (haste) =>
-          (7.5 - (combatant.hasTalent(TALENTS_PRIEST.WASTE_NO_TIME_TALENT) ? 1.5 : 0.0)) /
-          (1 + haste),
+        cooldown: hastedCooldown(
+          7.5 - (combatant.hasTalent(TALENTS_PRIEST.WASTE_NO_TIME_TALENT) ? 1.5 : 0.0),
+        ),
         gcd: {
           base: 1500,
         },
-      },
-      {
-        spell: TALENTS_PRIEST.PAIN_SUPPRESSION_TALENT.id,
-        charges: combatant.hasTalent(TALENTS_PRIEST.PROTECTOR_OF_THE_FRAIL_TALENT) ? 2 : 1,
-        category: SPELL_CATEGORY.DEFENSIVE,
-        cooldown: 180,
-        enabled: combatant.hasTalent(TALENTS_PRIEST.PAIN_SUPPRESSION_TALENT),
-      },
-      {
-        spell: TALENTS_PRIEST.DESPERATE_PRAYER_TALENT.id,
-        category: SPELL_CATEGORY.DEFENSIVE,
-        cooldown: 90 - (combatant.hasTalent(TALENTS_PRIEST.ANGELS_MERCY_TALENT) ? 20 : 0),
-        gcd: null,
-        enabled: combatant.hasTalent(TALENTS_PRIEST.DESPERATE_PRAYER_TALENT),
-      },
-      {
-        spell: [TALENTS_PRIEST.POWER_WORD_BARRIER_TALENT.id],
-        category: SPELL_CATEGORY.COOLDOWNS,
-        cooldown: 180,
-        gcd: {
-          base: 1500,
-        },
-        enabled: combatant.hasTalent(TALENTS_PRIEST.POWER_WORD_BARRIER_TALENT),
       },
       {
         spell: SPELLS.SMITE.id,
@@ -140,7 +103,7 @@ class Abilities extends CoreAbilities {
         gcd: {
           base: 1500,
         },
-        cooldown: (haste) => 28 / (1 + haste),
+        cooldown: hastedCooldown(28),
       },
       {
         spell: SPELLS.SHADOW_WORD_PAIN.id,
@@ -167,6 +130,97 @@ class Abilities extends CoreAbilities {
         },
         enabled: combatant.hasTalent(TALENTS_PRIEST.HOLY_NOVA_TALENT),
       },
+
+      // ------------------------------------------------------------------------------------------
+      // Cooldowns
+      // ------------------------------------------------------------------------------------------
+
+      {
+        spell: TALENTS_PRIEST.EVANGELISM_TALENT.id,
+        category: SPELL_CATEGORY.COOLDOWNS,
+        cooldown: 90,
+        gcd: {
+          base: 1500,
+        },
+        enabled: combatant.hasTalent(TALENTS_PRIEST.EVANGELISM_TALENT),
+        castEfficiency: {
+          suggestion: true,
+          recommendedEfficiency: 0.9,
+          averageIssueEfficiency: 0.8,
+          majorIssueEfficiency: 0.7,
+        },
+      },
+      {
+        spell: TALENTS_PRIEST.ULTIMATE_PENITENCE_TALENT.id,
+        category: SPELL_CATEGORY.COOLDOWNS,
+        gcd: {
+          base: 1500,
+        },
+        cooldown: 240,
+        castEfficiency: {
+          suggestion: true,
+          recommendedEfficiency: 0.9,
+          averageIssueEfficiency: 0.8,
+          majorIssueEfficiency: 0.7,
+        },
+        enabled: combatant.hasTalent(TALENTS_PRIEST.ULTIMATE_PENITENCE_TALENT),
+      },
+      {
+        spell: [TALENTS_PRIEST.POWER_WORD_BARRIER_TALENT.id],
+        category: SPELL_CATEGORY.COOLDOWNS,
+        cooldown: 180,
+        gcd: {
+          base: 1500,
+        },
+        enabled: combatant.hasTalent(TALENTS_PRIEST.POWER_WORD_BARRIER_TALENT),
+      },
+      {
+        spell: TALENTS_PRIEST.POWER_INFUSION_TALENT.id,
+        category: SPELL_CATEGORY.COOLDOWNS,
+        cooldown: 120,
+        gcd: null,
+        castEfficiency: {
+          suggestion: true,
+          recommendedEfficiency: 0.9,
+          averageIssueEfficiency: 0.8,
+          majorIssueEfficiency: 0.7,
+        },
+        enabled: combatant.hasTalent(TALENTS_PRIEST.POWER_INFUSION_TALENT),
+      },
+
+      // ------------------------------------------------------------------------------------------
+      // Defensive
+      // ------------------------------------------------------------------------------------------
+
+      {
+        spell: TALENTS_PRIEST.FADE_TALENT.id,
+        category: combatant.hasTalent(TALENTS_PRIEST.TRANSLUCENT_IMAGE_TALENT)
+          ? SPELL_CATEGORY.DEFENSIVE
+          : SPELL_CATEGORY.UTILITY,
+        cooldown: 30 - combatant.getTalentRank(TALENTS_PRIEST.IMPROVED_FADE_TALENT) * 5,
+        gcd: null,
+        enabled: combatant.hasTalent(TALENTS_PRIEST.FADE_TALENT),
+      },
+      {
+        spell: TALENTS_PRIEST.PAIN_SUPPRESSION_TALENT.id,
+        charges: 1 + (combatant.hasTalent(TALENTS_PRIEST.PROTECTOR_OF_THE_FRAIL_TALENT) ? 1 : 0),
+        category: SPELL_CATEGORY.DEFENSIVE,
+        cooldown: 180,
+        gcd: null,
+        enabled: combatant.hasTalent(TALENTS_PRIEST.PAIN_SUPPRESSION_TALENT),
+      },
+      {
+        spell: TALENTS_PRIEST.DESPERATE_PRAYER_TALENT.id,
+        category: SPELL_CATEGORY.DEFENSIVE,
+        cooldown: 90 - (combatant.hasTalent(TALENTS_PRIEST.ANGELS_MERCY_TALENT) ? 20 : 0),
+        gcd: null,
+        enabled: combatant.hasTalent(TALENTS_PRIEST.DESPERATE_PRAYER_TALENT),
+      },
+
+      // ------------------------------------------------------------------------------------------
+      // Utility
+      // ------------------------------------------------------------------------------------------
+
       {
         spell: SPELLS.PURIFY.id,
         category: SPELL_CATEGORY.UTILITY,
@@ -203,17 +257,9 @@ class Abilities extends CoreAbilities {
         enabled: combatant.hasTalent(TALENTS_PRIEST.ANGELIC_FEATHER_TALENT),
       },
       {
-        spell: TALENTS_PRIEST.FADE_TALENT.id,
-        category: combatant.hasTalent(TALENTS_PRIEST.TRANSLUCENT_IMAGE_TALENT)
-          ? SPELL_CATEGORY.DEFENSIVE
-          : SPELL_CATEGORY.UTILITY,
-        cooldown: 30 - combatant.getTalentRank(TALENTS_PRIEST.IMPROVED_FADE_TALENT) * 5,
-        enabled: combatant.hasTalent(TALENTS_PRIEST.FADE_TALENT),
-      },
-      {
         spell: TALENTS_PRIEST.LEAP_OF_FAITH_TALENT.id,
         category: SPELL_CATEGORY.UTILITY,
-        cooldown: combatant.hasTalent(TALENTS_PRIEST.MOVE_WITH_GRACE_TALENT) ? 60 : 90,
+        cooldown: 90 - (combatant.hasTalent(TALENTS_PRIEST.MOVE_WITH_GRACE_TALENT) ? 30 : 0),
         enabled: combatant.hasTalent(TALENTS_PRIEST.LEAP_OF_FAITH_TALENT),
       },
       {
@@ -248,6 +294,11 @@ class Abilities extends CoreAbilities {
           base: 1500,
         },
       },
+
+      // ------------------------------------------------------------------------------------------
+      // Hidden
+      // ------------------------------------------------------------------------------------------
+
       {
         spell: SPELLS.MIND_SOOTHE.id,
         category: SPELL_CATEGORY.HIDDEN,
@@ -262,20 +313,6 @@ class Abilities extends CoreAbilities {
         gcd: {
           base: 1500,
         },
-      },
-      {
-        spell: TALENTS_PRIEST.POWER_INFUSION_TALENT.id,
-        category: SPELL_CATEGORY.COOLDOWNS,
-        cooldown: 120,
-        gcd: null,
-        castEfficiency: {
-          suggestion: true,
-          recommendedEfficiency: 0.8,
-        },
-        //With Twins of the Sun Priestess, PI is added through the TwinsOftheSunPriestess module
-        enabled:
-          combatant.hasTalent(TALENTS_PRIEST.POWER_INFUSION_TALENT) &&
-          !combatant.hasTalent(TALENTS_PRIEST.TWINS_OF_THE_SUN_PRIESTESS_TALENT),
       },
     ];
   }

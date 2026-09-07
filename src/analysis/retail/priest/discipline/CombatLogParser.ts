@@ -53,6 +53,8 @@ import ShadowWordPain from 'analysis/retail/priest/shared/ShadowWordPain';
 import CoreSpellManaCost from 'parser/shared/modules/SpellManaCost';
 import EventLinkNormalizer from './normalizers/EventLinkNormalizer';
 import AtonementNormalizer from './normalizers/AtonementTracker';
+import Haste from 'analysis/retail/priest/discipline/modules/core/Haste';
+import AbilityTracker from 'analysis/retail/priest/discipline/modules/core/AbilityTracker';
 
 class CombatLogParser extends CoreCombatLogParser {
   static specModules = {
@@ -63,6 +65,9 @@ class CombatLogParser extends CoreCombatLogParser {
     atonementNormalizer: AtonementNormalizer,
     eventLinkNormalizer: EventLinkNormalizer,
 
+    // Core
+    haste: Haste,
+    abilityTracker: AbilityTracker,
     spellUsable: SpellUsable,
     spellManaCost: CoreSpellManaCost,
     lowHealthHealing: LowHealthHealing,
